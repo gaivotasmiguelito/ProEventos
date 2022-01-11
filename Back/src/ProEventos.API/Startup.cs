@@ -11,8 +11,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using ProEventos.API.Data;
+using ProEventos.Persistence;
 using Microsoft.EntityFrameworkCore;
+using ProEventos.Persistence.Contextos;
+using ProEventos.Application.Contratos;
+using ProEventos.Application;
+using ProEventos.Persistence.Contratos;
 
 namespace ProEventos.API
 {
@@ -31,14 +35,21 @@ namespace ProEventos.API
         {
             //instalar o Data Context
             //Fazer a referencia da base de dados
-            services.AddDbContext<DataContext>(
+            services.AddDbContext<ProEventosContext>(
                 //context => context.UseMySQL(Configuration.GetConnectionString("Default"))
                 context => context.UseSqlite(Configuration.GetConnectionString("Default"))
 
             );
 
-            services.AddControllers(); //Indica que estou a trabalhar com a arquitetura MVC com Views Controllers. Permite chamar o meu controller
+            services.AddControllers().AddNewtonsoftJson(
+                x=>x.SerializerSettings.ReferenceLoopHandling=Newtonsoft.Json.ReferenceLoopHandling.Ignore
+            ); //Indica que estou a trabalhar com a arquitetura MVC com Views Controllers. Permite chamar o meu controller
             //Rafael
+            services.AddScoped<IEventoService, EventoService>();
+            services.AddScoped<IGeralPersist, GeralPersist>();
+            services.AddScoped<IEventoPersist, EventoPersist>();
+            
+
             services.AddCors();
             services.AddSwaggerGen(c =>
             {
